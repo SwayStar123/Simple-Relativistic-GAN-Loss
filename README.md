@@ -54,9 +54,9 @@ d_loss += r2_penalty(discriminator, fake_images, gamma=1.0, disc_args=args, disc
 
 ## Approximate R1 loss referenced in the Seaweed paper, and a extrapolated version of the R2 loss:
 
-$`{L}_{aR1} = \lambda * \mathbb{E}_{x \sim p_D} \left[ \left\| D(x, c) - D\big(\mathcal{N}(x, \sigma I), c\big) \right\|_2^2 \right`]`$
+$`{L}_{aR1} = \lambda \mathbb{E}_{x \sim p_D} \left[ \left\| D(x, c) - D\big(\mathcal{N}(x, \sigma I), c\big) \right\|_2^2 \right]`$
 
-$`{L}_{aR2} = \lambda * \mathbb{E}_{x \sim p_\theta} \left[ \left\| D(x, c) - D\big(\mathcal{N}(x, \sigma I), c\big) \right\|_2^2 \right]`$
+$`{L}_{aR2} = \lambda \mathbb{E}_{x \sim p_\theta} \left[ \left\| D(x, c) - D\big(\mathcal{N}(x, \sigma I), c\big) \right\|_2^2 \right]`$
 
 
 The idea is that, the gradient penalty exists to disencourage large changes in the logits from a small change in the input. The approximation just adds a bit of noise to the input, which works similarly to taking the gradient in this case. This approximation is very helpful as FlashAttention cannot take a second derivative, so the true penalties are much slower to compute.
