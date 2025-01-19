@@ -53,8 +53,6 @@ d_loss += r2_penalty(discriminator, fake_images, gamma=1.0, disc_args=args, disc
 ```
 
 ## Approximate R1 loss referenced in the Seaweed paper, and a extrapolated version of the R2 loss:
-Here is the LaTeX representation of \(\mathcal{L}_{aR1}\) and \(\mathcal{L}_{aR2}\) with expectation notation for \(p_D\) and \(p_\theta\), respectively:
-
 
 $`{L}_{aR1} = \lambda * \mathbb{E}_{x \sim p_D} \left[ \left\| D(x, c) - D\big(\mathcal{N}(x, \sigma I), c\big) \right\|_2^2 \right`]`$
 
