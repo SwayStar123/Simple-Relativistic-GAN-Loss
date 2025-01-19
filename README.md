@@ -66,3 +66,11 @@ The idea is that, the gradient penalty exists to disencourage large changes in t
 d_loss += approximate_r1_loss(discriminator, real_images, sigma=0.01, Lambda=100.0, disc_args=disc_args, disc_kwargs=disc_kwargs) 
 d_loss += approximate_r2_loss(discriminator, fake_images, sigma=0.01, Lambda=100.0, disc_args=disc_args, disc_kwargs=disc_kwargs)
 ```
+
+## Example Outputs
+
+### Relativistic GAN loss + Real R1 + R2 gradient penalty
+![Real Samples](samples_real.png)
+
+### Relativistic GAN loss + Approximate R1 + R2 gradient penalty
+![Approximate Samples](samples_approx.png)
