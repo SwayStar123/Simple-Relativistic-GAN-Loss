@@ -175,27 +175,27 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 1) Train with real R1 + R2
-    gen_real = train_gan(use_approx=False, epochs=2, device=device)
+    gen_real = train_gan(use_approx=False, epochs=10, device=device)
 
     # 2) Train with approximate R1 + R2
-    gen_approx = train_gan(use_approx=True, epochs=2, device=device)
+    gen_approx = train_gan(use_approx=True, epochs=10, device=device)
 
     # Generate a fixed batch of noise
-    fixed_z = torch.randn(9, 100, 1, 1, device=device)  # 3x3 grid
+    fixed_z = torch.randn(81, 100, 1, 1, device=device)  # 9x9 grid
 
     # Evaluate and save images for the real-penalty model
     gen_real.eval()
     with torch.no_grad():
         imgs_real = gen_real(fixed_z)
-    grid = torchvision.utils.make_grid(imgs_real, nrow=3, normalize=True, scale_each=True)
+    grid = torchvision.utils.make_grid(imgs_real, nrow=9, normalize=True, scale_each=True)
 
     vutils.save_image(grid, "samples_real.png")
-    print("Saved 3x3 grid to samples_real.png")
+    print("Saved 9x9 grid to samples_real.png")
 
     # Evaluate and save images for the approximate-penalty model
     gen_approx.eval()
     with torch.no_grad():
         imgs_approx = gen_approx(fixed_z)
-    grid = torchvision.utils.make_grid(imgs_approx, nrow=3, normalize=True, scale_each=True)
+    grid = torchvision.utils.make_grid(imgs_approx, nrow=9, normalize=True, scale_each=True)
     vutils.save_image(grid, "samples_approx.png")
     print("Saved 9x9 grid to samples_approx.png")
