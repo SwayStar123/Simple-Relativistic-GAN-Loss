@@ -140,6 +140,7 @@ def approximate_r1_loss(
     discriminator,
     real_images,
     sigma=0.01,
+    Lambda=100.0,
     disc_args=None,
     disc_kwargs=None
 ):
@@ -155,7 +156,7 @@ def approximate_r1_loss(
     noise = sigma * torch.randn_like(real_images)
     d_real = discriminator(real_images, *disc_args, **disc_kwargs)
     d_noisy = discriminator(real_images + noise, *disc_args, **disc_kwargs)
-    return (d_real - d_noisy).pow(2).mean()
+    return ((d_real - d_noisy).pow(2).mean()) * Lambda
 
 
 ####################################
@@ -165,6 +166,7 @@ def approximate_r2_loss(
     discriminator,
     fake_images,
     sigma=0.01,
+    Lambda=100.0,
     disc_args=None,
     disc_kwargs=None
 ):
@@ -180,4 +182,4 @@ def approximate_r2_loss(
     noise = sigma * torch.randn_like(fake_images)
     d_fake = discriminator(fake_images, *disc_args, **disc_kwargs)
     d_fake_noisy = discriminator(fake_images + noise, *disc_args, **disc_kwargs)
-    return (d_fake - d_fake_noisy).pow(2).mean()
+    return ((d_fake - d_fake_noisy).pow(2).mean()) * Lambda
