@@ -3,6 +3,16 @@ Provided are GAN losses from the [R3GAN](https://arxiv.org/abs/2501.05441) and [
 ## Installation
 `pip install relativistic_loss`
 
+## Usage
+```python
+from relativistic_loss.loss import (
+    gan_loss,
+    r1_penalty,
+    r2_penalty,
+    approximate_r1_loss,
+    approximate_r2_loss
+)
+
 
 ## Relativistic GAN loss referenced in the R3GAN paper:
 
