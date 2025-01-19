@@ -12,6 +12,7 @@ from relativistic_loss.loss import (
     approximate_r1_loss,
     approximate_r2_loss
 )
+```
 
 
 ## Relativistic GAN loss referenced in the R3GAN paper:
