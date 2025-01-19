@@ -11,10 +11,10 @@ $`f(t) = -\log(1 + e^{-t})`$
 
 ```python
 # If f is omitted, logistic_f is used automatically
-d_loss = gan_loss(discriminator, generator, real_images, z)
+d_loss = -gan_loss(discriminator, generator, real_images, z)
 
 # You have to freeze the other model when doing a backward pass for generator or discriminator, otherwise you will combine the negative and positive gradients which will cancel out.
-g_loss = -gan_loss(discriminator, generator, real_images, z)
+g_loss = gan_loss(discriminator, generator, real_images, z)
 ```
 
 ### 2. Custom function 𝑓 If you have a different function (e.g. hinge), you can pass it in:
@@ -22,7 +22,7 @@ g_loss = -gan_loss(discriminator, generator, real_images, z)
 def hinge_f(t):
     return torch.nn.functional.relu(1 - t)
 
-d_loss = gan_loss(
+d_loss = -gan_loss(
     discriminator, generator, real_images, z,
     f=hinge_f
 )
@@ -30,7 +30,7 @@ d_loss = gan_loss(
 
 ### 3. Extra arguments to discriminator or generator, if your models need additional inputs:
 ```python
-d_loss = gan_loss(
+d_loss = -gan_loss(
     discriminator, generator,
     real_images, z,
     generator_args=(some_label, ),          # positional
