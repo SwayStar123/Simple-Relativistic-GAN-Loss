@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "relativistic_loss"
+version = "0.1.0"
+description = "A collection of GAN loss functions"
+readme = "README.md"
+requires-python = ">=3.6"
+license = {text = "MIT"}
+authors = [
+    {name = "SwayStar123"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = ["torch"]
+
+[project.urls]
+"Homepage" = "https://github.com/SwayStar123/Simple-Relativistic-GAN-Loss"
+
+[tool.setuptools]
+py-modules = ["relativistic_loss"]

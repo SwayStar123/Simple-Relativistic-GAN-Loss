@@ -1,5 +1,9 @@
 Provided are GAN losses from the [R3GAN](https://arxiv.org/abs/2501.05441) and [Seaweed](https://arxiv.org/abs/2501.08316) papers.
 
+## Installation
+`pip install relativistic_loss`
+
+
 ## Relativistic GAN loss referenced in the R3GAN paper:
 
 $`{L}(\theta, \psi) = \mathbb{E}_{z \sim p_z, \, x \sim p_D} \left[ f \left( D_\psi(G_\theta(z)) - D_\psi(x) \right) \right]`$

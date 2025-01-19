@@ -8,7 +8,7 @@ import torchvision.utils as vutils
 from tqdm import tqdm
 
 # Import the loss components from loss.py
-from loss import (
+from relativistic_loss.loss import (
     gan_loss,
     r1_penalty,
     r2_penalty,
