@@ -107,8 +107,8 @@ Saturating loss (saturating_gan_loss)
 
 Non saturating loss (gan_loss)
 
-![Real Samples](samples_fake_non_saturating.png)
+![Real Samples](samples_approx_non_saturating.png)
 
 Saturating loss (saturating_gan_loss)
 
-![Real Samples Saturating](samples_fake_saturating.png)
+![Real Samples Saturating](samples_approx_saturating.png)
