@@ -13,7 +13,8 @@ from relativistic_loss.loss import (
     r1_penalty,
     r2_penalty,
     approximate_r1_loss,
-    approximate_r2_loss
+    approximate_r2_loss,
+    saturating_gan_loss
 )
 
 ###############################################################################
@@ -87,6 +88,7 @@ class DCDiscriminator(nn.Module):
 ###############################################################################
 def train_gan(
     use_approx=False,
+    use_saturating=False,
     epochs=2,
     batch_size=64,
     lr=2e-4,
@@ -115,7 +117,7 @@ def train_gan(
     opt_d = optim.Adam(disc.parameters(), lr=lr, betas=(0.5, 0.999))
 
     # 4) Training loop
-    print(f"---- Training with use_approx={use_approx} ----")
+    print(f"---- Training with use_approx={use_approx} and use_saturating={use_saturating} ----")
     for epoch in range(epochs):
         # tqdm progress bar
         pbar = tqdm(dataloader, desc=f"Epoch {epoch+1}/{epochs}")
@@ -129,7 +131,10 @@ def train_gan(
 
             # Basic GAN loss
             z = torch.randn(batch_size, z_dim, 1, 1, device=device)
-            d_loss = -gan_loss(disc, gen, imgs, z)  # default logistic
+            if use_saturating:
+                d_loss = -saturating_gan_loss(disc, gen, imgs, z)
+            else:
+                d_loss = gan_loss(disc, gen, imgs, z, True)
 
             # Add penalty
             if use_approx:
@@ -154,7 +159,11 @@ def train_gan(
             # -----------------
             opt_g.zero_grad()
             z = torch.randn(batch_size, z_dim, 1, 1, device=device)
-            g_loss = gan_loss(disc, gen, imgs, z)  # by default logistic
+
+            if use_saturating:
+                g_loss = saturating_gan_loss(disc, gen, imgs, z)
+            else:
+                g_loss = gan_loss(disc, gen, imgs, z, False)
             g_loss.backward()
             opt_g.step()
 
@@ -174,11 +183,36 @@ def train_gan(
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # 1) Train with real R1 + R2
-    gen_real = train_gan(use_approx=False, epochs=10, device=device)
+    # # 1) Train with real R1 + R2
+    # gen_real = train_gan(use_approx=False, use_saturating=False, epochs=10, device=device)
 
-    # 2) Train with approximate R1 + R2
-    gen_approx = train_gan(use_approx=True, epochs=10, device=device)
+    # # 2) Train with approximate R1 + R2
+    # gen_approx = train_gan(use_approx=True, use_saturating=False, epochs=10, device=device)
+
+    # # Generate a fixed batch of noise
+    # fixed_z = torch.randn(81, 100, 1, 1, device=device)  # 9x9 grid
+
+    # # Evaluate and save images for the real-penalty model
+    # gen_real.eval()
+    # with torch.no_grad():
+    #     imgs_real = gen_real(fixed_z)
+    # grid = torchvision.utils.make_grid(imgs_real, nrow=9, normalize=True, scale_each=True)
+
+    # vutils.save_image(grid, "samples_real_non_saturating.png")
+    # print("Saved 9x9 grid to samples_real_non_saturating.png")
+
+    # # Evaluate and save images for the approximate-penalty model
+    # gen_approx.eval()
+    # with torch.no_grad():
+    #     imgs_approx = gen_approx(fixed_z)
+    # grid = torchvision.utils.make_grid(imgs_approx, nrow=9, normalize=True, scale_each=True)
+    # vutils.save_image(grid, "samples_approx_non_saturating.png")
+    # print("Saved 9x9 grid to samples_approx_non_saturating.png")
+
+
+    gen_real = train_gan(use_approx=False, use_saturating=True, epochs=10, device=device)
+
+    gen_approx = train_gan(use_approx=True, use_saturating=True, epochs=10, device=device)
 
     # Generate a fixed batch of noise
     fixed_z = torch.randn(81, 100, 1, 1, device=device)  # 9x9 grid
@@ -189,13 +223,14 @@ if __name__ == "__main__":
         imgs_real = gen_real(fixed_z)
     grid = torchvision.utils.make_grid(imgs_real, nrow=9, normalize=True, scale_each=True)
 
-    vutils.save_image(grid, "samples_real.png")
-    print("Saved 9x9 grid to samples_real.png")
+    vutils.save_image(grid, "samples_real_saturating.png")
+    print("Saved 9x9 grid to samples_real_saturating.png")
 
     # Evaluate and save images for the approximate-penalty model
     gen_approx.eval()
     with torch.no_grad():
         imgs_approx = gen_approx(fixed_z)
     grid = torchvision.utils.make_grid(imgs_approx, nrow=9, normalize=True, scale_each=True)
-    vutils.save_image(grid, "samples_approx.png")
-    print("Saved 9x9 grid to samples_approx.png")
+    vutils.save_image(grid, "samples_approx_saturating.png")
+    print("Saved 9x9 grid to samples_approx_saturating.png")
+

@@ -13,7 +13,7 @@ def logistic_f(t):
 ####################################
 # 1) Main GAN Loss with default f(t)
 ####################################
-def gan_loss(
+def saturating_gan_loss(
     discriminator,
     generator,
     real_images,
@@ -25,7 +25,7 @@ def gan_loss(
     disc_kwargs=None
 ):
     """
-    Generic GAN loss of the form:
+    Saturating Relativistic GAN loss of the form:
         E_{z,x}[ f( D(G(z)) - D(x) ) ].
 
     Args:
@@ -64,6 +64,64 @@ def gan_loss(
 
     # Compute the loss using default or provided f
     loss = f(disc_fake - disc_real).mean()
+    return loss
+
+def gan_loss(
+    discriminator,
+    generator,
+    real_images,
+    z,
+    discriminator_turn=True,
+    f=None,
+    generator_args=None,
+    generator_kwargs=None,
+    disc_args=None,
+    disc_kwargs=None
+):
+    """
+    Non saturating Relativistic GAN loss of the form:
+        E_{z,x}[ f(-(D(G(z)) - D(x))) ].
+    for the discriminator, and form:
+        E_{z,x}[ f(-(D(x) - D(G(z)))) ].
+    for the generator.
+
+    Args:
+        discriminator: Discriminator network D
+        generator: Generator network G
+        real_images: A batch of real data (x)
+        z: Noise tensor sampled from p_z
+        discriminator_turn: If True, calculates loss for the discriminator, else for the generator
+        f: Callable for f(D(fake) - D(real)) [defaults to torch.nn.functional.softplus]
+        generator_args: Extra positional args for G
+        generator_kwargs: Extra keyword args for G
+        disc_args: Extra positional args for D
+        disc_kwargs: Extra keyword args for D
+    """
+    # Default the function to logistic_f if none is provided
+    if f is None:
+        f = torch.nn.functional.softplus
+
+    if generator_args is None:
+        generator_args = ()
+    if generator_kwargs is None:
+        generator_kwargs = {}
+    if disc_args is None:
+        disc_args = ()
+    if disc_kwargs is None:
+        disc_kwargs = {}
+
+    # Generate fake images
+    fake_images = generator(z, *generator_args, **generator_kwargs)
+
+    # Evaluate discriminator
+    disc_real = discriminator(real_images, *disc_args, **disc_kwargs)
+    disc_fake = discriminator(fake_images, *disc_args, **disc_kwargs)
+
+    # Compute the loss using default or provided f
+    if discriminator_turn:
+        loss = f(disc_fake - disc_real).mean()
+    else:
+        loss = f(disc_real - disc_fake).mean()
     return loss
 
 
