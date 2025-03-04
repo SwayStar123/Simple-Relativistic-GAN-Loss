@@ -241,3 +241,70 @@ def approximate_r2_loss(
     d_fake = discriminator(fake_images, *disc_args, **disc_kwargs)
     d_fake_noisy = discriminator(fake_images + noise, *disc_args, **disc_kwargs)
     return ((d_fake - d_fake_noisy).pow(2).mean()) * Lambda
+
+
+def gan_loss_with_approximate_penalties(
+    discriminator,
+    generator,
+    real_images,
+    z,
+    discriminator_turn=True,
+    f=None,
+    generator_args=None,
+    generator_kwargs=None,
+    disc_args=None,
+    disc_kwargs=None,
+    sigma=0.01,
+    Lambda=100.0
+):
+    """
+    Non saturating Relativistic GAN loss of the form:
+        E_{z,x}[ f(-(D(G(z)) - D(x))) ].
+    for the discriminator, and form:
+        E_{z,x}[ f(-(D(x) - D(G(z)))) ].
+    for the generator.
+
+    Adds approximate R1 and R2 penalties to the discriminator loss.
+
+    Args:
+        discriminator: Discriminator network D
+        generator: Generator network G
+        real_images: A batch of real data (x)
+        z: Noise tensor sampled from p_z
+        discriminator_turn: If True, calculates loss for the discriminator, else for the generator
+        f: Callable for f(D(fake) - D(real)) [defaults to torch.nn.functional.softplus]
+        generator_args: Extra positional args for G
+        generator_kwargs: Extra keyword args for G
+        disc_args: Extra positional args for D
+        disc_kwargs: Extra keyword args for D
+        sigma: Standard deviation of the noise added to the real images
+        Lambda: Weight for the approximate R1 and R2 penalties
+    """
+    # Default the function to logistic_f if none is provided
+    if f is None:
+        f = torch.nn.functional.softplus
+
+    if generator_args is None:
+        generator_args = ()
+    if generator_kwargs is None:
+        generator_kwargs = {}
+    if disc_args is None:
+        disc_args = ()
+    if disc_kwargs is None:
+        disc_kwargs = {}
+
+    # Generate fake images
+    fake_images = generator(z, *generator_args, **generator_kwargs)
+
+    # Evaluate discriminator
+    disc_real = discriminator(real_images, *disc_args, **disc_kwargs)
+    disc_fake = discriminator(fake_images, *disc_args, **disc_kwargs)
+
+    # Compute the loss using default or provided f
+    if discriminator_turn:
+        loss = f(disc_fake - disc_real).mean()
+        loss += approximate_r1_loss(discriminator, real_images, sigma, Lambda, disc_args, disc_kwargs)
+        loss += approximate_r2_loss(discriminator, fake_images, sigma, Lambda, disc_args, disc_kwargs)
+    else:
+        loss = f(disc_real - disc_fake).mean()
+    return loss

@@ -53,7 +53,7 @@ d_loss = gan_loss(
 
 ### 3. Extra arguments to discriminator or generator, if your models need additional inputs:
 ```python
-d_loss = -gan_loss(
+d_loss = gan_loss(
     discriminator, generator,
     real_images, z,
     discriminator_turn=True,
